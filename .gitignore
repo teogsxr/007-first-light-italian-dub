@@ -2,3 +2,6 @@ backups/
 *.log
 __pycache__/
 .DS_Store
+outputs/
+*_original_*.wav
+*original*source*.wav

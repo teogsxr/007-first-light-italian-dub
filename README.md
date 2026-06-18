@@ -4,6 +4,8 @@
 
 Versione `0.1` del doppiaggio italiano source-first per 007 First Light.
 
+[Pagina metodo e casting voci](docs/method.html): ascolto pubblico con soli audio generati, confronto voce target senza patos vs source-first con patos.
+
 ## Stato
 
 - Audio patchati: `4859/16255` = `29.89%`.
@@ -52,12 +54,12 @@ Questa e una prima passata automatica pensata anche come pipeline riusabile per 
 - Le righe non patchate restano in backlog per retake/repair.
 - Non include file originali del gioco.
 
-## QA locale
+## Supporto al progetto
 
-E stata creata anche una pagina locale di confronto `originale -> voce target senza patos -> source-first con patos`, ma non viene inclusa qui perche contiene audio sorgente originale del gioco.
+Il progetto resta gratuito e andra avanti anche senza donazioni. Le eventuali donazioni vengono usate per acquistare crediti AI, rigenerare audio e migliorare piu velocemente le prossime versioni.
 
-Percorso locale:
-
-```text
-C:\Users\matte\Documents\Codex\2026-06-12\saresti-in-grado-di-creare-una\outputs\NoPathosVsSourceFirst_20260618_0852\index.html
-```
+<p align="center">
+  <a href="https://www.paypal.com/donate/?business=matteo.sai%40hotmail.it&currency_code=EUR" target="_blank" rel="noopener noreferrer">
+    <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Dona con PayPal">
+  </a>
+</p>
