@@ -4,7 +4,7 @@
 
 Versione `0.1` del doppiaggio italiano source-first per 007 First Light.
 
-[Pagina metodo e casting voci](docs/method.html): ascolto pubblico con soli audio generati, confronto voce target senza patos vs source-first con patos.
+[Pagina metodo e casting voci](https://teogsxr.github.io/007-first-light-italian-dub-v0.1/): ascolto pubblico con soli audio generati, confronto voce target senza patos vs source-first con patos.
 
 ## Stato
 
