@@ -27,7 +27,7 @@ Il video mostra un controllo reale del primo capitolo sulla build locale v0.4. L
 
 > Nota: dopo questa cattura sono stati applicati ulteriori fix mirati ai sottotitoli/HUD nella scena di apertura.
 
-<video controls preload="metadata" poster="docs/assets/video/ch1-opening-wip-v0.4-poster.jpg" src="docs/assets/video/ch1-opening-wip-v0.4.mp4"></video>
+![Gameplay WIP v0.4](docs/assets/video/ch1-opening-wip-v0.4-preview.gif)
 
 ## Cosa cambia in v0.4
 
