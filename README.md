@@ -16,7 +16,7 @@ Versione `0.4` del doppiaggio italiano source-first per 007 First Light.
 - Greenway: `243/328` = `74.09%`.
 - Moneypenny: `231/335` = `68.96%`.
 - Asset generati inclusi: `10569` WEM, `182.39 MiB`.
-- Pacchetto zip v0.4: circa `208.04 MiB`.
+- Pacchetto zip v0.4: circa `235.76 MiB`.
 - Installer aggiornato con supporto append-relocation per `6` WEM fuori capacita originale.
 
 La tabella completa per personaggio e in [`docs/progress_by_character.md`](docs/progress_by_character.md). Le istruzioni di installazione agnostica sono in [`docs/installation.md`](docs/installation.md).
@@ -27,7 +27,9 @@ Il video mostra una prova reale del primo capitolo sulla build locale v0.4, regi
 
 > Nota: il prossimo passaggio di QA sul capitolo 1 controlla anche la distinzione tra personaggio in primo piano, voce radio e parlato di sottofondo, cosi le battute ambientali non vengono giudicate o catalogate come singolo attore foreground.
 
-![Gameplay WIP v0.4](docs/assets/video/ch1-opening-wip-v0.4-preview.gif)
+[![Gameplay WIP v0.4](docs/assets/video/ch1-opening-wip-v0.4-poster.jpg)](https://teogsxr.github.io/007-first-light-italian-dub/#video-gameplay-wip)
+
+Il video non parte automaticamente: clicca sull'immagine per aprire il player con controlli nella pagina pubblica.
 
 ## Cosa cambia in v0.4
 
