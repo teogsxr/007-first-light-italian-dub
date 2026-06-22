@@ -16,16 +16,16 @@ Versione `0.4` del doppiaggio italiano source-first per 007 First Light.
 - Greenway: `243/328` = `74.09%`.
 - Moneypenny: `231/335` = `68.96%`.
 - Asset generati inclusi: `10569` WEM, `182.39 MiB`.
-- Pacchetto zip v0.4: circa `207.99 MiB`.
+- Pacchetto zip v0.4: circa `208.04 MiB`.
 - Installer aggiornato con supporto append-relocation per `6` WEM fuori capacita originale.
 
 La tabella completa per personaggio e in [`docs/progress_by_character.md`](docs/progress_by_character.md). Le istruzioni di installazione agnostica sono in [`docs/installation.md`](docs/installation.md).
 
 ## Video gameplay WIP v0.4
 
-Il video mostra un controllo reale del primo capitolo sulla build locale v0.4. La scena non e ancora una localizzazione finale rifinita a mano, ma fa vedere dove sta arrivando la pipeline source-first: voce target stabile, patos recuperato dal source, adattamento italiano e sottotitoli in revisione.
+Il video mostra una prova reale del primo capitolo sulla build locale v0.4, registrata il 22 giugno 2026 alle 14:11 dopo i fix mirati su apertura, HUD e sottotitoli. La scena non e ancora una localizzazione finale rifinita a mano, ma fa vedere dove sta arrivando la pipeline source-first: voce target stabile, patos recuperato dal source, adattamento italiano e sottotitoli molto piu vicini al risultato giocabile.
 
-> Nota: dopo questa cattura sono stati applicati ulteriori fix mirati ai sottotitoli/HUD nella scena di apertura.
+> Nota: il prossimo passaggio di QA sul capitolo 1 controlla anche la distinzione tra personaggio in primo piano, voce radio e parlato di sottofondo, cosi le battute ambientali non vengono giudicate o catalogate come singolo attore foreground.
 
 ![Gameplay WIP v0.4](docs/assets/video/ch1-opening-wip-v0.4-preview.gif)
 

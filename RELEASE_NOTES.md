@@ -3,9 +3,10 @@
 - Copertura pubblicata: `10569/16255` audio, pari al `65.02%`.
 - Avanzamento cumulativo interno: `10594/16255`, pari al `65.17%`.
 - Asset generati: `10569` WEM, `182.39 MiB` nel manifest mod.
-- Pacchetto installabile: `007-first-light-italian-dub-v0.4.zip`, circa `207.99 MiB`.
+- Pacchetto installabile: `007-first-light-italian-dub-v0.4.zip`, circa `208.04 MiB`.
 - Aggiornata la pagina pubblica metodo/casting/video: https://teogsxr.github.io/007-first-light-italian-dub/
-- Aggiunto video gameplay WIP del capitolo 1, con nota che alcuni fix sottotitoli/HUD sono successivi alla cattura.
+- Aggiornato il video gameplay WIP del capitolo 1 con la cattura del 22 giugno 2026 alle 14:11, dopo i fix mirati su apertura, HUD e sottotitoli.
+- Aggiunto al piano QA del capitolo 1 il controllo di ruolo audio: personaggio foreground, radio/comm e parlato di sottofondo non devono essere confusi nel giudizio di casting o nei report.
 - Capitolo 1 in test gameplay ravvicinato: fix mirati su sottotitoli non allineati, testo adattato, timing e frasi troncate.
 - Installer aggiornato con supporto append-relocation per `6` WEM che superano lo slot originale.
 - Esclusi dal pacchetto pubblico `25` asset preserve/originali: sono tracciati nel cumulativo locale ma non ridistribuiti.
