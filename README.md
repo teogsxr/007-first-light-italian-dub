@@ -29,8 +29,6 @@ Il video mostra un controllo reale del primo capitolo sulla build locale v0.4. L
 
 <video controls preload="metadata" poster="docs/assets/video/ch1-opening-wip-v0.4-poster.jpg" src="docs/assets/video/ch1-opening-wip-v0.4.mp4"></video>
 
-[Guarda il video gameplay WIP v0.4](docs/assets/video/ch1-opening-wip-v0.4.mp4)
-
 ## Cosa cambia in v0.4
 
 - Copertura pubblicata aumentata da `8182` a `10569` audio generati installabili.
