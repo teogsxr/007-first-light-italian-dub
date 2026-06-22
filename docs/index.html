@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>007 First Light Italian Dub - Metodo source-first</title>
+  <title>007 First Light Italian Dub v0.4 - Metodo source-first</title>
   <style>
     :root {
       color-scheme: dark;
@@ -99,9 +99,17 @@
       font-size: .92rem;
       margin-bottom: 7px;
     }
-    audio {
+    audio, video {
       width: 100%;
-      height: 34px;
+      border-radius: 8px;
+      background: #080a0d;
+    }
+    audio { height: 34px; }
+    video {
+      display: block;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      max-height: 640px;
     }
     table {
       width: 100%;
@@ -130,16 +138,15 @@
 </head>
 <body>
   <header>
-    <h1>Metodo source-first e casting voci</h1>
+    <h1>007 First Light Italian Dub v0.4</h1>
     <p>
-      Questa pagina mostra come e stata costruita la v0.3 del doppiaggio italiano:
-      una voce target approvata per il personaggio, poi una generazione source-first
-      che eredita ritmo, intensita, pause e patos dalla battuta originale.
+      Doppiaggio italiano AI source-first: voce target stabile, audio sorgente
+      come regia della performance, adattamento italiano e QA runtime.
     </p>
     <div class="meta">
-      <span class="pill">v0.3</span>
-      <span class="pill">8182 audio patchati</span>
-      <span class="pill">50.34% del dialogo mappato</span>
+      <span class="pill">v0.4</span>
+      <span class="pill">10569 audio installabili</span>
+      <span class="pill">65.02% del dialogo mappato</span>
       <span class="pill">non one-shot clone</span>
     </div>
   </header>
@@ -147,34 +154,49 @@
   <main>
     <div class="notice">
       Per motivi di copyright questa pagina non include audio originale del gioco.
-      I player qui sotto contengono solo audio generati per la mod.
+      I player audio qui sotto contengono solo audio generati per la mod. Il video
+      gameplay e una cattura WIP locale usata per mostrare lo stato della mod.
     </div>
 
-    <h2>Stato v0.3</h2>
+    <h2>Video gameplay WIP</h2>
     <p>
-      La release pubblicata contiene 8182 WEM generati e runtime-approved su 16255
-      audio ufficiali mappati. La v0.3 introduce una copertura giocabile piu
-      rapida: le righe gold strict restano source-first complete, mentre le righe
-      playable provisional mantengono gate duri su timing, ASR, semantica,
-      sottotitoli, capacity e runtime, ma segnano pathos/conformance come debito
-      di rifinitura.
+      La clip mostra una prova reale del primo capitolo. Dopo questa cattura sono
+      stati applicati altri fix mirati ai sottotitoli/HUD, quindi il video serve
+      come anteprima dello stato della pipeline, non come master definitivo.
+    </p>
+    <video controls preload="metadata" poster="assets/video/ch1-opening-wip-v0.4-poster.jpg" src="assets/video/ch1-opening-wip-v0.4.mp4"></video>
+
+    <h2>Stato v0.4</h2>
+    <p>
+      La release pubblicata contiene 10569 WEM generati e runtime-approved su
+      16255 audio ufficiali mappati. Il cumulativo interno arriva a 10594 righe:
+      25 sono preserve/originali tracciate per la pipeline ma escluse dal pacchetto
+      pubblico per non ridistribuire audio originale del gioco.
     </p>
 
     <table>
       <thead>
         <tr>
           <th>Voce</th>
-          <th>Valore v0.3</th>
+          <th>Valore v0.4</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>Copertura</td>
-          <td>8182/16255, pari al 50.34%</td>
+          <td>Copertura pubblicata</td>
+          <td>10569/16255, pari al 65.02%</td>
         </tr>
         <tr>
           <td>Bond</td>
-          <td>439/715 audio patchati</td>
+          <td>538/715 audio patchati, pari al 75.24%</td>
+        </tr>
+        <tr>
+          <td>Greenway</td>
+          <td>243/328 audio patchati, pari al 74.09%</td>
+        </tr>
+        <tr>
+          <td>Moneypenny</td>
+          <td>231/335 audio patchati, pari al 68.96%</td>
         </tr>
         <tr>
           <td>Metodo</td>
@@ -182,7 +204,7 @@
         </tr>
         <tr>
           <td>Limite dichiarato</td>
-          <td>Prima passata automatica: copertura giocabile ora, rifinitura recitativa dopo.</td>
+          <td>Release WIP giocabile: copertura ora, rifinitura recitativa dopo.</td>
         </tr>
       </tbody>
     </table>
@@ -247,7 +269,7 @@
       </article>
     </div>
 
-    <h2>Come sono state scelte le voci</h2>
+    <h2>Pipeline</h2>
     <table>
       <thead>
         <tr>
@@ -266,7 +288,7 @@
         </tr>
         <tr>
           <td>3. Adattamento italiano</td>
-          <td>Il testo puo essere accorciato o riscritto professionalmente quando il timing originale non consente una traduzione letterale.</td>
+          <td>Il testo puo essere accorciato o riscritto professionalmente quando il timing originale non consente una traduzione letterale. Se cambia l'audio, il sottotitolo deve seguire.</td>
         </tr>
         <tr>
           <td>4. QA automatico</td>

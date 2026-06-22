@@ -235,7 +235,8 @@ $ApplyArgs = @(
   (Join-Path $Root "tools\apply_wem_manifest.py"),
   "--game-path", $ResolvedGamePath,
   "--manifest", "mod_manifest/runtime_wem_manifest.csv",
-  "--label", "007_it_dub_v0_3"
+  "--label", "007_it_dub_v0_4",
+  "--allow-append-relocation"
 )
 
 if (-not $DryRun) {

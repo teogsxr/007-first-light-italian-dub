@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-VERSION = "0.3"
+VERSION = "0.4"
 TOTAL_OFFICIAL_AUDIO = 16255
 DEFAULT_PROJECT_ROOT_ENV = "DUBBING_007_PROJECT_ROOT"
 
@@ -36,6 +36,8 @@ MANIFEST_COLUMNS = [
     "official_speaker_id",
     "official_speaker_name",
     "sourcefirst_policy",
+    "wem_append_relocation_required",
+    "runtime_capacity_bytes",
 ]
 
 
@@ -247,7 +249,7 @@ def text_value(row: dict[str, str], *keys: str) -> str:
 def progress_summary(progress_rows: list[dict[str, str]]) -> dict[str, str]:
     total = sum(int(float(r.get("total_audio") or 0)) for r in progress_rows)
     patched = sum(int(float(r.get("patched_audio") or 0)) for r in progress_rows)
-    remaining = sum(int(float(r.get("remaining_audio") or 0)) for r in progress_rows)
+    remaining = max(0, total - patched)
     completion = (patched / total * 100) if total else 0
     bond = next((r for r in progress_rows if r.get("official_speaker_id") == "BOND"), {})
     return {
@@ -257,6 +259,30 @@ def progress_summary(progress_rows: list[dict[str, str]]) -> dict[str, str]:
         "completion": f"{completion:.2f}",
         "bond": f"{bond.get('patched_audio', '0')}/{bond.get('total_audio', '0')}",
     }
+
+
+def release_progress_rows(progress_rows: list[dict[str, str]], manifest_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    patched_by_speaker: dict[str, int] = {}
+    for row in manifest_rows:
+        speaker_id = row.get("official_speaker_id", "")
+        patched_by_speaker[speaker_id] = patched_by_speaker.get(speaker_id, 0) + 1
+
+    release_rows: list[dict[str, str]] = []
+    for row in progress_rows:
+        total = int(float(row.get("total_audio") or 0))
+        speaker_id = row.get("official_speaker_id", "")
+        patched = patched_by_speaker.get(speaker_id, 0)
+        remaining = max(0, total - patched)
+        pct = (patched / total * 100) if total else 0
+        release_rows.append(
+            {
+                **row,
+                "patched_audio": str(patched),
+                "remaining_audio": str(remaining),
+                "patched_percent": f"{pct:.2f}".rstrip("0").rstrip("."),
+            }
+        )
+    return release_rows
 
 
 def write_progress_docs(repo: Path, progress_rows: list[dict[str, str]]) -> None:
@@ -335,6 +361,11 @@ def main() -> int:
         default="",
         help="Optional installed game root used to select WEM candidates that fit the current Runtime chunks.",
     )
+    parser.add_argument(
+        "--allow-append-relocation",
+        action="store_true",
+        help="Allow generated WEMs larger than the current runtime slot; installer will append and relocate them.",
+    )
     args = parser.parse_args()
 
     if not args.project_root:
@@ -369,23 +400,43 @@ def main() -> int:
     resolved: dict[str, Path] = {}
     missing: list[str] = []
     oversize: list[str] = []
+    skipped_unpublishable_original: list[dict[str, str]] = []
     resolver_audit: list[dict[str, str]] = []
     for h, row in unique_rows.items():
         chunk = chunk_name(row)
         capacity = runtime_capacities.get(chunk, {}).get(h) if runtime_capacities else None
         direct = Path(row.get("wem_path") or "")
+        direct_ok = row.get("wem_path") and direct.exists() and is_generated_wem(str(direct))
         chosen: Path | None = (
             direct
-            if row.get("wem_path") and direct.exists() and is_generated_wem(str(direct)) and fits_capacity(direct, capacity)
+            if direct_ok and (fits_capacity(direct, capacity) or args.allow_append_relocation)
             else None
         )
         source = "cumulative_wem_path" if chosen else ""
         if chosen is None:
-            candidates = [p for p in wem_index.get(h, []) if p.exists() and fits_capacity(p, capacity)]
+            candidates = [
+                p
+                for p in wem_index.get(h, [])
+                if p.exists() and (fits_capacity(p, capacity) or args.allow_append_relocation)
+            ]
             if candidates:
                 chosen = sorted(candidates, key=lambda p: candidate_sort_key(p, row))[0]
                 source = "resolved_generated_candidate"
         if chosen is None:
+            if row.get("wem_path") and not is_generated_wem(row.get("wem_path") or ""):
+                skipped_unpublishable_original.append(
+                    {
+                        "source_hash": h,
+                        "chunk": chunk,
+                        "reason": "not_redistributed_original_or_preserved_runtime_audio",
+                        "wem_path_hint": public_path_hint(Path(row.get("wem_path") or ""), project_root),
+                        "sourcefirst_batch": row.get("sourcefirst_batch", ""),
+                        "official_speaker_id": row.get("official_speaker_id", ""),
+                        "official_speaker_name": row.get("official_speaker_name", ""),
+                        "target_it": text_value(row, "target_it", "final_spoken_text_it", "target_text_it_display"),
+                    }
+                )
+                continue
             if capacity is None:
                 missing.append(h)
             else:
@@ -401,6 +452,9 @@ def main() -> int:
                 "score": str(rank_candidate(chosen, row)),
                 "wem_size_bytes": str(chosen.stat().st_size),
                 "runtime_capacity_bytes": "" if capacity is None else str(capacity),
+                "wem_append_relocation_required": (
+                    "true" if capacity is not None and chosen.stat().st_size > capacity else "false"
+                ),
                 "official_speaker_id": row.get("official_speaker_id", ""),
                 "official_speaker_name": row.get("official_speaker_name", ""),
             }
@@ -418,7 +472,7 @@ def main() -> int:
 
     manifest_rows: list[dict[str, str]] = []
     total_bytes = 0
-    for h in sorted(unique_rows):
+    for h in sorted(resolved):
         row = unique_rows[h]
         chunk = chunk_name(row)
         src = resolved[h]
@@ -456,16 +510,35 @@ def main() -> int:
                 "official_speaker_name": row.get("official_speaker_name", ""),
                 "sourcefirst_policy": text_value(row, "sourcefirst_policy")
                 or "source_audio_acting_authority;approved_voice_identity_authority;no_accent_polish",
+                "wem_append_relocation_required": (
+                    "true"
+                    if runtime_capacities.get(chunk, {}).get(h) is not None
+                    and size > runtime_capacities.get(chunk, {}).get(h, 0)
+                    else "false"
+                ),
+                "runtime_capacity_bytes": (
+                    "" if runtime_capacities.get(chunk, {}).get(h) is None else str(runtime_capacities[chunk][h])
+                ),
             }
         )
 
     write_csv(repo / "mod_manifest" / "runtime_wem_manifest.csv", manifest_rows, MANIFEST_COLUMNS)
+    if skipped_unpublishable_original:
+        write_csv(
+            repo / "mod_manifest" / f"unpublished_original_preserve_v{VERSION}.csv",
+            skipped_unpublishable_original,
+            list(skipped_unpublishable_original[0].keys()),
+        )
     (repo / "mod_manifest" / "runtime_wem_manifest.json").write_text(
         json.dumps(
             {
                 "version": VERSION,
                 "rows": len(manifest_rows),
                 "total_bytes": total_bytes,
+                "skipped_unpublishable_original_rows": len(skipped_unpublishable_original),
+                "append_relocation_rows": sum(
+                    1 for row in manifest_rows if row.get("wem_append_relocation_required") == "true"
+                ),
                 "manifest": "mod_manifest/runtime_wem_manifest.csv",
                 "built_at": datetime.now().isoformat(timespec="seconds"),
                 "source_cumulative_csv": cumulative_csv.name,
@@ -476,10 +549,25 @@ def main() -> int:
         encoding="utf-8",
     )
     write_csv(repo / "mod_manifest" / f"wem_resolver_audit_v{VERSION}.csv", resolver_audit, list(resolver_audit[0].keys()))
-    write_progress_docs(repo, progress_rows)
+    release_rows = release_progress_rows(progress_rows, manifest_rows)
+    write_progress_docs(repo, release_rows)
 
     if progress_md.exists():
-        shutil.copy2(progress_md, repo / "LOCAL_PRODUCTION_STATUS.md")
+        summary = progress_summary(release_rows)
+        local_status = [
+            f"# 007 First Light - Public Release v{VERSION} Status",
+            "",
+            f"Generated: {datetime.now().isoformat(timespec='seconds')}",
+            "",
+            f"- Public installable generated audio: `{summary['patched']}/{summary['total']}` = `{summary['completion']}%`.",
+            f"- Remaining official audio: `{summary['remaining']}`.",
+            f"- Bond: `{summary['bond']}`.",
+            f"- Skipped original/preserved runtime audio not redistributed: `{len(skipped_unpublishable_original)}`.",
+            f"- Append-relocation WEM rows supported by installer: `{sum(1 for row in manifest_rows if row.get('wem_append_relocation_required') == 'true')}`.",
+            "",
+            "This public release contains generated mod audio only. Preserved original-game audio rows are tracked in the local pipeline but excluded from the GitHub package.",
+        ]
+        (repo / "LOCAL_PRODUCTION_STATUS.md").write_text("\n".join(local_status) + "\n", encoding="utf-8")
 
     output_zip = repo.parent / f"007-first-light-italian-dub-v{VERSION}.zip"
     make_zip(repo, output_zip)
@@ -490,6 +578,7 @@ def main() -> int:
             "manifest_rows": len(manifest_rows),
             "mod_wem_files": len(list(mod_wem.rglob("*.wem"))),
             "total_bytes": total_bytes,
+            "skipped_unpublishable_original_rows": len(skipped_unpublishable_original),
             "zip": str(output_zip),
             "zip_bytes": output_zip.stat().st_size,
         },

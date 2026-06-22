@@ -129,6 +129,11 @@ def main() -> int:
     parser.add_argument("--label", default="007_it_dub_v0_1")
     parser.add_argument("--backup-root", default="backups")
     parser.add_argument("--apply", action="store_true", help="Actually patch the game. Without it, performs a dry run.")
+    parser.add_argument(
+        "--allow-append-relocation",
+        action="store_true",
+        help="Allow oversize WEMs by appending them to the RPKG and updating resource offset/size fields.",
+    )
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[1]
@@ -158,6 +163,7 @@ def main() -> int:
     for row in rows:
         grouped.setdefault(row.get("chunk") or "chunk1", []).append(row)
 
+    append_cursors = {chunk: path.stat().st_size for chunk, path in chunk_paths.items() if path.exists()}
     for chunk, chunk_rows in grouped.items():
         if not chunk_rows:
             continue
@@ -185,8 +191,15 @@ def main() -> int:
                 errors.append({"hash": hash_text, "chunk": chunk, "reason": f"missing_wem:{source_wem}"})
                 continue
             new_data = source_wem.read_bytes()
-            if len(new_data) > entry.size_final:
-                errors.append({"hash": hash_text, "chunk": chunk, "reason": f"oversize:{len(new_data)}>{entry.size_final}"})
+            relocation_required = len(new_data) > entry.size_final
+            if relocation_required and not args.allow_append_relocation:
+                errors.append(
+                    {
+                        "hash": hash_text,
+                        "chunk": chunk,
+                        "reason": f"oversize:{len(new_data)}>{entry.size_final}",
+                    }
+                )
                 continue
 
             with chunk_path.open("rb") as f:
@@ -200,6 +213,11 @@ def main() -> int:
             if args.apply:
                 (backup_dir / original_rel).write_bytes(original_stored)
                 (backup_dir / new_rel).write_bytes(new_data)
+            write_data_offset = append_cursors[chunk] if relocation_required else entry.data_offset
+            target_size_final = len(new_data) if relocation_required else entry.size_final
+            pad_bytes = 0 if relocation_required else entry.size_final - len(new_data)
+            if relocation_required:
+                append_cursors[chunk] += len(new_data)
             planned.append(
                 {
                     "hash": hash_text,
@@ -207,13 +225,16 @@ def main() -> int:
                     "chunk": chunk,
                     "chunk_path": str(chunk_path),
                     "data_offset": entry.data_offset,
+                    "write_data_offset": write_data_offset,
+                    "relocation_required": relocation_required,
                     "data_size_raw": entry.data_size_raw,
                     "data_offset_field_offset": entry.data_offset_field_offset,
                     "data_size_raw_field_offset": entry.data_size_raw_field_offset,
                     "size_final_offset": entry.size_final_offset,
                     "original_size_final": entry.size_final,
                     "new_size_final": len(new_data),
-                    "pad_bytes": entry.size_final - len(new_data),
+                    "target_size_final": target_size_final,
+                    "pad_bytes": pad_bytes,
                     "original_relative_path": original_rel_text,
                     "new_relative_path": new_rel_text,
                     "original_sha1": sha1_bytes(apply_xor(original_stored)),
@@ -235,16 +256,29 @@ def main() -> int:
             with chunk_path.open("r+b") as f:
                 for row in chunk_rows:
                     new_data = (backup_dir / str(row["new_relative_path"])).read_bytes()
-                    old_size = int(row["original_size_final"])
-                    f.seek(int(row["data_offset"]))
-                    f.write(apply_xor(new_data + (b"\x00" * (old_size - len(new_data)))))
+                    relocation_required = str(row.get("relocation_required", "")).lower() == "true"
+                    if relocation_required:
+                        stored_payload = apply_xor(new_data)
+                    else:
+                        old_size = int(row["original_size_final"])
+                        stored_payload = apply_xor(new_data + (b"\x00" * (old_size - len(new_data))))
+                    f.seek(int(row.get("write_data_offset", row["data_offset"])))
+                    f.write(stored_payload)
+                    if relocation_required:
+                        f.seek(int(row["data_offset_field_offset"]))
+                        f.write(struct.pack("<Q", int(row["write_data_offset"])))
                     f.seek(int(row["size_final_offset"]))
-                    f.write(struct.pack("<I", old_size))
+                    f.write(struct.pack("<I", int(row.get("target_size_final", row["original_size_final"]))))
             entries = parse_rpkg_entries(chunk_path)
             for row in chunk_rows:
                 entry = entries[str(row["hash"])]
                 new_data = (backup_dir / str(row["new_relative_path"])).read_bytes()
-                expected = new_data + (b"\x00" * (int(row["original_size_final"]) - len(new_data)))
+                relocation_required = str(row.get("relocation_required", "")).lower() == "true"
+                expected = (
+                    new_data
+                    if relocation_required
+                    else new_data + (b"\x00" * (int(row["original_size_final"]) - len(new_data)))
+                )
                 if read_runtime_resource(chunk_path, entry) != expected:
                     raise SystemExit(f"Verification failed for {row['hash']}")
 
@@ -256,6 +290,7 @@ def main() -> int:
         "backup_dir": str(backup_dir) if args.apply else "",
         "output_dir": str(backup_dir),
         "file_count": len(planned),
+        "append_relocation_allowed": bool(args.allow_append_relocation),
         "files": planned,
     }
     (backup_dir / "patch_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")

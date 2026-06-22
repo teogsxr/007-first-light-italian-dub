@@ -1,17 +1,19 @@
-# Release notes v0.3
+# Release notes v0.4
 
-- Copertura pubblicata: `8182/16255` audio, pari al `50.34%`.
-- Asset generati: `8182` WEM, `133.30 MiB` nel manifest mod.
-- Pacchetto installabile: `007-first-light-italian-dub-v0.3.zip`, circa `136.16 MiB`.
-- Aggiornata la pagina pubblica metodo/casting: https://teogsxr.github.io/007-first-light-italian-dub/
+- Copertura pubblicata: `10569/16255` audio, pari al `65.02%`.
+- Avanzamento cumulativo interno: `10594/16255`, pari al `65.17%`.
+- Asset generati: `10569` WEM, `182.39 MiB` nel manifest mod.
+- Pacchetto installabile: `007-first-light-italian-dub-v0.4.zip`, circa `191.46 MiB`.
+- Aggiornata la pagina pubblica metodo/casting/video: https://teogsxr.github.io/007-first-light-italian-dub/
+- Aggiunto video gameplay WIP del capitolo 1, con nota che alcuni fix sottotitoli/HUD sono successivi alla cattura.
+- Capitolo 1 in test gameplay ravvicinato: fix mirati su sottotitoli non allineati, testo adattato, timing e frasi troncate.
+- Installer aggiornato con supporto append-relocation per `6` WEM che superano lo slot originale.
+- Esclusi dal pacchetto pubblico `25` asset preserve/originali: sono tracciati nel cumulativo locale ma non ridistribuiti.
 - Aggiornati manifest, progressi per personaggio e audit di ricostruzione WEM.
-- Installer agnostico rispetto allo store: procedura guidata Steam/non Steam, `-GamePath`, `game_path.txt`, variabili ambiente e rilevamento da cartelle parent; Steam e solo un percorso possibile.
-- Aggiunta pipeline di release da cumulativo con risoluzione conservativa dei soli WEM generati.
-- Consolidato il flusso guarded/prededuped: niente rerender/ripatch accidentale di hash gia applicati.
-- Metodo source-first: voce target approvata, audio sorgente come autorita di recitazione, QA ASR/timing/semantic/runtime/subtitle.
-- Nuova lane `playable provisional`: aumenta velocemente la copertura giocabile mantenendo gate duri su testo, timing, sottotitoli, capacity e runtime, ma segnando pathos/conformance come debito di rifinitura.
+- Installer agnostico rispetto allo store: procedura guidata Steam/non Steam, `-GamePath`, `game_path.txt`, variabili ambiente e rilevamento da cartelle parent.
+- Metodo source-first confermato: voce target approvata, audio sorgente come autorita di recitazione, QA ASR/timing/semantic/runtime/subtitle.
 - Non include file originali del gioco.
 
 ## Note qualita
 
-La v0.3 non e una localizzazione finale rifinita a mano: e una prima passata automatica pensata per scalare velocemente. La pipeline privilegia copertura giocabile, sicurezza runtime, sottotitoli coerenti e possibilita di rifinire dopo. Alcune righe possono avere recitazione meno precisa o accento residuo se correggerli avrebbe rallentato troppo la copertura o danneggiato timing/testo.
+La v0.4 non e una localizzazione finale rifinita a mano: e una release WIP giocabile della pipeline automatica. La priorita resta preservare pathos, sincronizzazione, sottotitoli coerenti e sicurezza runtime. Alcune righe possono avere recitazione meno precisa o accento residuo se correggerli avrebbe danneggiato timing/testo o rallentato troppo la copertura.
